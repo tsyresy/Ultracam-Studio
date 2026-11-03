@@ -18,3 +18,11 @@
 8. iOS : compilation Xcode, permission réseau local, caméra, connexion et contrôle ; aucun binaire iOS fourni ici.
 
 Ne pas confondre réussite de compilation et validation d’usage réelle. Aucun test matériel de bout en bout n’a été réalisé dans cet environnement.
+
+## Mise à jour 0.1.1 (sources)
+
+- Compilation Windows WPF réussie ; exécution de l’interface Windows non testée sous Linux.
+- 16 contrôles .NET réussis, dont 5 contrôles ADB simulés.
+- Mobile : TypeScript, tests d’appairage Wi-Fi/USB, export Metro/Hermes et compilation Kotlin release du module réussis.
+- À ajouter à la recette matérielle : ADB absent, autorisation refusée/acceptée, plusieurs téléphones, câble retiré/rebranché, bascule Wi-Fi/USB, état après coupure, focus clavier et réduction des mouvements.
+- Les modifications iOS ne sont ni compilées ni validées sur matériel.

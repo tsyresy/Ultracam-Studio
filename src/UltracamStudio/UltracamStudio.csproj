@@ -2,8 +2,8 @@
  <PropertyGroup>
   <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting>
   <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><AssemblyName>Ultracam Studio Pro</AssemblyName><RootNamespace>UltracamStudio</RootNamespace>
-  <ApplicationIcon>../../Ultracam-logo.ico</ApplicationIcon><Version>0.1.0</Version><Company>Ultracam</Company><Product>Ultracam Studio Pro</Product>
+  <ApplicationIcon>../../Ultracam-logo.ico</ApplicationIcon><Version>0.1.1</Version><Company>Ultracam</Company><Product>Ultracam Studio Pro</Product>
  </PropertyGroup>
  <ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App"/><PackageReference Include="QRCoder" Version="1.6.0"/></ItemGroup>
- <ItemGroup><Resource Include="../../Ultracam-logo.png" Link="Assets/logo.png"/><Resource Include="../../loading-screen.png" Link="Assets/loading-screen.png"/></ItemGroup>
+ <ItemGroup><Resource Include="../../Ultracam-logo.png" Link="Assets/logo.png"/></ItemGroup>
 </Project>

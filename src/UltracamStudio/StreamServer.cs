@@ -19,6 +19,7 @@ public sealed class StreamServer : IAsyncDisposable {
  public string Token {get;private set;}=Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
  public event Action<byte[]>? Frame;
  public event Action<string>? Device;
+ public event Action<string>? Transport;
  public event Action<string>? Status;
  public string PairingUrl(string ip)=>$"ws://{ip}:{Port}/stream?token={Token}";
  public static string[] Addresses()=>NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up&&n.NetworkInterfaceType!=NetworkInterfaceType.Loopback).SelectMany(n=>n.GetIPProperties().UnicastAddresses).Where(a=>a.Address.AddressFamily==AddressFamily.InterNetwork).Select(a=>a.Address.ToString()).Distinct().DefaultIfEmpty("127.0.0.1").ToArray();
@@ -36,6 +37,7 @@ public sealed class StreamServer : IAsyncDisposable {
   lock(gate){if(!CryptographicOperations.FixedTimeEquals(candidate,Encoding.UTF8.GetBytes(Token))){ctx.Response.StatusCode=401;return;}if(active!=null){ctx.Response.StatusCode=409;return;}}
   ws=await ctx.WebSockets.AcceptWebSocketAsync();
   lock(gate){if(active!=null||!CryptographicOperations.FixedTimeEquals(candidate,Encoding.UTF8.GetBytes(Token))){ws.Abort();ws.Dispose();return;}active=ws;}
+  Transport?.Invoke(ctx.Connection.RemoteIpAddress is { } peer && IPAddress.IsLoopback(peer) ? "Local / USB · JPEG" : "Réseau · JPEG");
   Status?.Invoke("Téléphone connecté");
   try{
    var buffer=new byte[65536];
@@ -49,7 +51,7 @@ public sealed class StreamServer : IAsyncDisposable {
     else {using var json=JsonDocument.Parse(message.ToArray());if(json.RootElement.TryGetProperty("type",out var type)&&type.GetString()=="hello"&&json.RootElement.TryGetProperty("name",out var name))Device?.Invoke((name.GetString()??"Téléphone")[..Math.Min(80,(name.GetString()??"Téléphone").Length)]);}
    }
   }catch(Exception e) when(e is WebSocketException or OperationCanceledException or JsonException){Status?.Invoke("Téléphone déconnecté");}
-  finally {lock(gate){if(ReferenceEquals(active,ws))active=null;}ws.Dispose();Device?.Invoke("Aucun téléphone connecté");Status?.Invoke("En attente d’un téléphone");}
+  finally {lock(gate){if(ReferenceEquals(active,ws))active=null;}ws.Dispose();Transport?.Invoke("—");Device?.Invoke("Aucun téléphone connecté");Status?.Invoke("En attente d’un téléphone");}
  }
  public async Task CommandAsync(string type,object value){await sendLock.WaitAsync();try{var ws=active;if(ws?.State==WebSocketState.Open)await ws.SendAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{type,value})),WebSocketMessageType.Text,true,CancellationToken.None);}catch(WebSocketException){Status?.Invoke("Commande non transmise : téléphone déconnecté");}finally{sendLock.Release();}}
  public async ValueTask DisposeAsync(){active?.Abort();if(app!=null){await app.StopAsync();await app.DisposeAsync();}sendLock.Dispose();}

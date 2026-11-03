@@ -1,4 +1,4 @@
-# Ultracam Studio Pro — version 0.1.0
+# Ultracam Studio Pro — version 0.1.1 (sources)
 
 Application Windows native WPF/.NET, créée indépendamment. Aucun abonnement ni activation payante. Cette livraison est une première version technique ; ce n’est pas une réplique complète de Camo Pro.
 
@@ -25,7 +25,7 @@ Le filtre DirectShow constitue une voie de compatibilité large, mais aucune com
 
 ## Limites et travail restant
 
-Pas encore d’audio/microphone virtuel, de transport USB direct, de H.264/HEVC matériel, de 4K/60 fps, de contrôle manuel ISO/vitesse/balance des blancs physique, de scènes multicaméra, de suivi de visage, de segmentation IA, de LUT, de diffusion RTMP ni d’installeur signé. Aucun bouton ne prétend activer ces fonctions.
+Pas encore d’audio/microphone virtuel, de transport USB natif sans ADB, de H.264/HEVC matériel, de 4K/60 fps, de contrôle manuel ISO/vitesse/balance des blancs physique, de scènes multicaméra, de suivi de visage, de segmentation IA, de LUT, de diffusion RTMP ni d’installeur signé. Aucun bouton ne prétend activer ces fonctions.
 
 Le transport actuel est **non chiffré** (`ws://`). Utiliser exclusivement un réseau privé de confiance. Le lien QR est un secret d’accès : ne pas le publier. Un pair présent sur le réseau peut observer le trafic. Les réglages et l’appairage ne sont pas persistés entre sessions.
 
@@ -59,3 +59,18 @@ Ces tests couvrent les corrections de pixels, la structure AVI, le serveur HTTP/
 ## Désinstaller la caméra
 
 Exécuter `camera/Uninstall-Camera.ps1` en administrateur. Le script retire l’inscription des filtres et la règle de pare-feu dédiée, sans supprimer vos captures.
+
+## Mise à jour 0.1.1 — USB Android
+
+Installer Android SDK Platform-Tools : le Studio recherche `adb.exe` dans `platform-tools` à côté de l’EXE, le SDK Android local, `ANDROID_HOME`/`ANDROID_SDK_ROOT`, puis le `PATH`. Aucun téléchargement automatique ni remplacement de votre ADB n’est effectué.
+
+1. Brancher un câble de données, activer le débogage USB et autoriser ce PC sur Android.
+2. Cliquer sur **Connecter en USB**. S’il y a plusieurs appareils, en sélectionner un puis recliquer.
+3. Scanner le QR affiché avec Ultracam Remote Mobile. Le tunnel cible `127.0.0.1:49721` sur le téléphone.
+4. Après reconnexion du câble, recliquer sur le bouton puis reconnecter l’application.
+
+Le bouton prépare un tunnel ADB ; il ne prétend pas qu’une caméra transmet déjà. Le champ transport indique « Local / USB » pour une connexion de boucle locale et « Réseau » pour une connexion distante ; une connexion locale ne prouve pas à elle seule la présence d’un câble.
+
+Le bouton **Actualiser le réseau Wi-Fi** recharge les adresses après un changement de réseau. Sélectionner l’IP correcte puis rescanner le QR pour changer de connexion.
+
+Voir [CHANGELOG.md](CHANGELOG.md) pour les validations et les limites de cette version. Les exécutables existants du dossier `release` ne sont pas remplacés par cette modification des sources.

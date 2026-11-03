@@ -14,4 +14,17 @@ using(var second=new ClientWebSocket()){bool rejected=false;try{await second.Con
 await phone.SendAsync(new byte[]{255,216},WebSocketMessageType.Binary,false,CancellationToken.None);await phone.SendAsync(new byte[]{255,217,0},WebSocketMessageType.Binary,true,CancellationToken.None);var frame=await received.Task.WaitAsync(TimeSpan.FromSeconds(3));Check(frame.Length==5&&frame[0]==255,"fragmented video frame reassembled");
 await server.CommandAsync("zoom",.5);var buffer=new byte[1000];var command=await phone.ReceiveAsync(buffer,CancellationToken.None);Check(Encoding.UTF8.GetString(buffer,0,command.Count).Contains("zoom"),"camera control delivered");
 var previous=server.Token;server.RenewToken();Check(previous!=server.Token,"pairing renewal invalidates old secret");
+var devices=UsbConnection.ParseDevices("List of devices attached\nSERIAL_1\tdevice\nSERIAL_2\tunauthorized\nSERIAL_3\toffline\n* daemon started successfully *\n");
+Check(devices.Length==3 && devices[0].State=="device" && devices[1].State=="unauthorized", "ADB device discovery preserves authorization states");
+var calls=new List<string[]>();
+var usb=new UsbConnection(args=>{calls.Add(args);return Task.FromResult(args.SequenceEqual(new[]{"devices"}) ? "SERIAL_1\tdevice\n" : "");});
+Check((await usb.DevicesAsync()).Single().Serial=="SERIAL_1", "USB discovery delegates to ADB");
+await usb.ConnectAsync(devices[0]);
+Check(calls.Last().SequenceEqual(new[]{"-s","SERIAL_1","reverse","tcp:49721","tcp:49721"}), "USB tunnel targets the selected device and Studio port");
+var count=calls.Count;bool denied=false;
+try{await usb.ConnectAsync(devices[1]);}catch(InvalidOperationException){denied=true;}
+Check(denied && calls.Count==count,"unauthorized USB device cannot create tunnel");
+var failedUsb=new UsbConnection(_=>Task.FromException<string>(new InvalidOperationException("offline")));
+bool failed=false;try{await failedUsb.ConnectAsync(devices[0]);}catch(InvalidOperationException){failed=true;}
+Check(failed,"ADB failure is surfaced instead of reporting connection success");
 Console.WriteLine("All checks passed.");
