@@ -3,3 +3,8 @@ dist/
 release/
 *.log
 .DS_Store
+bin/
+obj/
+analysis/
+.vs/
+*.user
